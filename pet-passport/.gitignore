@@ -1,0 +1,11 @@
+# Rust/Cargo
+target/
+Cargo.lock
+
+# Anchor
+.anchor/.idea/
+test-ledger/
+*.sofiles/
+
+# Node
+node_modules/
