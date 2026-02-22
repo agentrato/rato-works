@@ -1,81 +1,110 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useWallet } from '@solana/wallet-adapter-react';
+import { useConnection } from '@solana/wallet-adapter-react';
+import { useNavigate } from 'react-router-dom';
 import PetCard from './PetCard';
+import { fetchPetsByOwner, PetData } from '../utils/petPassport';
+import { PublicKey } from '@solana/web3.js';
 
-// Mock data for pets
-const mockPets = [
-  {
-    id: '1',
-    name: 'Fluffy',
-    species: 'Cat',
-    breed: 'Persian',
-    birthDate: '2020-05-15',
-    imageUrl: 'https://placedog.net/300/300?id=1',
-    lastUpdated: '2023-01-15',
-    nextVaccination: '2023-06-15',
-  },
-  {
-    id: '2',
-    name: 'Buddy',
-    species: 'Dog',
-    breed: 'Golden Retriever',
-    birthDate: '2019-08-22',
-    imageUrl: 'https://placedog.net/300/300?id=2',
-    lastUpdated: '2023-01-10',
-    nextVaccination: '2023-02-22',
-  },
-];
+interface PetEntry {
+  pubkey: PublicKey;
+  data: PetData;
+}
 
 const PetList = () => {
-  const [pets] = useState(mockPets);
+  const { publicKey } = useWallet();
+  const { connection } = useConnection();
+  const navigate = useNavigate();
+  const [pets, setPets] = useState<PetEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!publicKey) {
+      setPets([]);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadPets = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const fetched = await fetchPetsByOwner(connection, publicKey);
+        if (!cancelled) {
+          setPets(fetched);
+        }
+      } catch (err) {
+        console.error('Error fetching pets:', err);
+        if (!cancelled) {
+          setError('Failed to load pets from the blockchain');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadPets();
+    return () => { cancelled = true; };
+  }, [publicKey, connection]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-16">
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-solana-green border-r-transparent"></div>
+        <p className="mt-4 text-gray-400">Loading pets from Solana...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+        <p className="text-sm text-red-400">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {pets.map((pet) => (
-          <PetCard key={pet.id} pet={pet} />
-        ))}
-      </div>
-      
-      {pets.length === 0 && (
-        <div className="text-center py-12">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              vectorEffect="non-scaling-stroke"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+        {pets.map((pet) => {
+          const birthDate = new Date(pet.data.birthDate * 1000).toISOString().split('T')[0];
+          const lastUpdated = new Date(pet.data.lastUpdated * 1000).toISOString().split('T')[0];
+          const nextVacc = pet.data.vaccinationRecords.length > 0
+            ? new Date(pet.data.vaccinationRecords[pet.data.vaccinationRecords.length - 1].nextDueDate * 1000).toISOString().split('T')[0]
+            : undefined;
+
+          return (
+            <PetCard
+              key={pet.pubkey.toString()}
+              id={pet.pubkey.toString()}
+              name={pet.data.name}
+              species={pet.data.species}
+              breed={pet.data.breed}
+              birthDate={birthDate}
+              lastUpdated={lastUpdated}
+              nextVaccination={nextVacc}
+              owner={pet.data.owner.toString()}
+              onClick={() => navigate(`/pet/${pet.pubkey.toString()}`)}
             />
-          </svg>
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No pets</h3>
-          <p className="mt-1 text-sm text-gray-500">Get started by adding a new pet passport.</p>
-          <div className="mt-6">
-            <button
-              type="button"
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <svg
-                className="-ml-1 mr-2 h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              Add Pet
-            </button>
+          );
+        })}
+      </div>
+
+      {pets.length === 0 && (
+        <div className="text-center py-16">
+          <div className="w-20 h-20 rounded-2xl gradient-solana flex items-center justify-center text-4xl font-bold mx-auto mb-4">
+            K
           </div>
+          <h3 className="mt-4 text-lg font-semibold gradient-solana-text">No pets found</h3>
+          <p className="mt-2 text-sm text-gray-500">
+            Create your first pet record using the "Add New Pet" tab.
+          </p>
         </div>
       )}
     </div>

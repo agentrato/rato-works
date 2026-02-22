@@ -7,17 +7,16 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import { clusterApiUrl } from '@solana/web3.js';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
+import PetDetail from './components/PetDetail';
+import PublicPetView from './components/PublicPetView';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 function App() {
-  // Set up the Solana network (devnet for development)
   const network = WalletAdapterNetwork.Devnet;
-  
-  // You can also use `clusterApiUrl(network)` to get the RPC endpoint
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
 
-  // Initialize the wallets
   const wallets = useMemo(
     () => [
       new PhantomWalletAdapter(),
@@ -28,11 +27,17 @@ function App() {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets}>
         <WalletModalProvider>
-          <div className="min-h-screen bg-gray-100">
-            <Dashboard />
-          </div>
+          <BrowserRouter>
+            <div className="min-h-screen bg-solana-dark">
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/pet/:pubkey" element={<PetDetail />} />
+                <Route path="/view/:pubkey" element={<PublicPetView />} />
+              </Routes>
+            </div>
+          </BrowserRouter>
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

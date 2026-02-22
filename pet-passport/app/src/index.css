@@ -2,16 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer base {
+  body {
+    @apply bg-solana-dark text-white antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@layer utilities {
+  .gradient-solana {
+    background: linear-gradient(135deg, #9945FF, #14F195);
+  }
+  .gradient-solana-text {
+    background: linear-gradient(135deg, #9945FF, #14F195);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .glow-purple {
+    box-shadow: 0 0 20px rgba(153, 69, 255, 0.15);
+  }
+}
+
+@layer components {
+  .btn-solana {
+    @apply relative px-6 py-3 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300;
+    background: linear-gradient(135deg, #9945FF, #14F195);
+  }
+  .btn-solana:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(153, 69, 255, 0.3);
+  }
+  .btn-solana:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .input-solana {
+    @apply w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-gray-500 transition-all duration-200;
+  }
+  .input-solana:focus {
+    @apply outline-none border-solana-purple ring-2 ring-solana-purple/30;
+  }
+}
+
+/* Wallet adapter modal must appear above everything */
+.wallet-adapter-modal-wrapper {
+  z-index: 9999 !important;
+}
+.wallet-adapter-modal-overlay {
+  z-index: 9998 !important;
+}
+.wallet-adapter-modal {
+  z-index: 9999 !important;
+}
+.wallet-adapter-button {
+  z-index: 10 !important;
+  position: relative !important;
 }

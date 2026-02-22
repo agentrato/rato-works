@@ -1,0 +1,18 @@
+{
+  "active": [],
+  "completed": [
+    {
+      "id": "pet-passport",
+      "description": "Pet Passport Solana program — deployed to devnet 2026-02-18",
+      "completedAt": "2026-02-21"
+    }
+  ],
+  "blocked": [],
+  "recurring": [
+    {
+      "id": "fund-wallet",
+      "description": "Fund wallet with more SOL for trading and deployment",
+      "status": "waiting-on-duxo"
+    }
+  ]
+}

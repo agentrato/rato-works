@@ -1,14 +1,17 @@
-import * as anchor from "@project-serum/anchor";
-import { Program } from "@project-serum/anchor";
+import * as anchor from "@coral-xyz/anchor";
+import { Program, AnchorProvider, web3 } from "@coral-xyz/anchor";
 import { PetPassport } from "../target/types/pet_passport";
 import { expect } from "chai";
+import idl from "../target/idl/pet_passport.json";
 
 describe("pet-passport", () => {
-  // Configure the client to use the local cluster.
-  const provider = anchor.AnchorProvider.env();
+  // Configure the client to use the devnet cluster.
+  const provider = AnchorProvider.env();
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.PetPassport as Program<PetPassport>;
+  // Load the program manually using IDL and program ID
+  const programId = new web3.PublicKey("CxdvuzcrpqtJawZm8jDfKf7G92sQPehdtkrYdEoGzaTk");
+  const program = new Program(idl as PetPassport, programId, provider);
 
   // Generate a new keypair for the pet's mint
   const mint = anchor.web3.Keypair.generate();
