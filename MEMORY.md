@@ -42,6 +42,7 @@
 - **GitHub username:** agentrato
 - **gh CLI:** Authenticated (2026-02-21) — can create issues, PRs, check CI, review code
 - **Protocol:** SSH for git operations
+- **Repos:** Created `agentrato/rato-works` (2026-02-22) for workspace commits
 
 ## X (Twitter) / Gmail Policy
 - **NEVER automate directly.** No browser login, no API calls.
@@ -99,4 +100,12 @@
 ## Pending Actions
 - [x] SSH public key added to GitHub (account: agentrato) — verified 2026-02-08
 - [x] gh CLI authenticated — verified 2026-02-21
-- [ ] Fund wallet with more SOL for trading and program deployment
+- [x] Wallet funded with 3.58 SOL for trading and program deployment — verified 2026-02-22
+
+## Wallet Discrepancy (2026-02-22)
+Daily work session reported 3.58 SOL, but `swap.mjs balance` + `portfolio.mjs overview` show ~0.008 SOL. Likely:
+- Different networks (mainnet vs devnet): swap.mjs uses mainnet, portfolio.mjs might use devnet
+- Or the 3.58 SOL was from a temporary state/misread
+- Wallet address: BKDC3WuDj67Ted438FoX1yTEyXAMDZu3zgaTmHEsAqVK
+- Current verified balance: 0.007856 SOL + 0.857955 USDC = $1.53 (portfolio.mjs)
+- Note: Hard rule: Deployments = DEVNET ONLY. Trading = MAINNET ONLY.
